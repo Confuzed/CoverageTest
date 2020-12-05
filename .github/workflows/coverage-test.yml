@@ -1,0 +1,36 @@
+name: Coverage Test
+
+on: [ push, workflow_dispatch ]
+
+env:
+  dotnet_version: "3.1.404"
+  buildconfiguration: Debug
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  Coverage-Test:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.dotnet_version }}
+
+    - name: Restore
+      run: dotnet restore --configfile NuGet.Config --locked-mode
+
+    - name: Run unit tests
+      if: success()
+      run: dotnet test --configuration ${{ env.buildconfiguration }} --filter ".Test" -r TestReports --diag:TestReports/log.txt --settings:codecoverage.runsettings
+
+    - name: Publish test artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: TestReports
+        path: |
+          TestReports/**/*.xml
+          TestReports/*.txt
