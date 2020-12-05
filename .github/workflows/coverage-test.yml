@@ -21,7 +21,7 @@ jobs:
         dotnet-version: ${{ env.dotnet_version }}
 
     - name: Restore
-      run: dotnet restore --configfile NuGet.Config --locked-mode
+      run: dotnet restore --locked-mode
 
     - name: Run unit tests
       if: success()
